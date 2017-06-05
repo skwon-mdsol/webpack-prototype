@@ -76,19 +76,19 @@ class TableContainer extends Component {
   }
 
   render() {
-    const {page, perPage} = this.state;
+    const {page, perPage, rawData: {data = []} = {} } = this.state;
 
     return (
       <div>
         {header}
         <div id="main">
           <div className="mcc-col mcc-content">
-            { studiesTableLayout(this.state.rawData.data, page, perPage) }
+            { studiesTableLayout(data, page, perPage) }
             <Paginate
               onPaginate={this.onPaginate}
-              totalItems={100}
-              currentPage={this.state.currPage}
-              perPage={this.state.maxPage}
+              totalItems={data.length}
+              currentPage={page}
+              perPage={perPage}
               translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
           </div>
         </div>
