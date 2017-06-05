@@ -2,35 +2,36 @@ import React, { Component } from 'react';
 import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
+//TODO: Figure out sandman styles
 
-const studiesRow = (study) => {
-  return (<tr key={study.protocolId}>
-    <td>{study.protocolId}</td>
-    <td>{study.studyName}</td>
-    <td>{study.studyStatus}</td>
-    <td>{study.riskPlan}</td>
-    <td>{study.planStatus}</td>
-    <td>{study.lastUpdated}</td>
-    <td>{study.updatedBy}</td>
+const studiesRow = (study, cols) => {
+  return (<tr>
+    {
+      cols.map((c, i) => (
+        <td key={`td_${i}`}>{study[c]}</td>
+      ))
+    }
   </tr>);
 };
 
-const studiesTableLayout = (studies = []) => {
+const studiesTableLayout = (studies = [], page = 0, perPage = 0) => {
   return (
     <table className="table table-hover studies-table study-list-table">
       <thead>
         <tr>
-          <th>Protocol ID</th>
-          <th>Study Name</th>
-          <th>Study Status</th>
-          <th>Risk Plan</th>
-          <th>Plan Status</th>
-          <th>Last Updated</th>
-          <th>Updated By</th>
+        {
+          studies[0] && Object.keys(studies[0]).map((k, i) => (
+            <th key={`th_${i}`}>{k}</th>
+          ))
+        }
         </tr>
       </thead>
       <tbody>
-      {studies.map(study => studiesRow(study))}
+      {
+        studies
+          .filter((s, place) => (place >= ((page - 1) * perPage) && place < (page * perPage)))
+          .map(study => studiesRow(study, Object.keys(studies[0])))
+      }
       </tbody>
     </table>
   )
@@ -41,42 +42,36 @@ class TableContainer extends Component {
     super(props);
 
     this.state = {
-      rawData: [],
-      currPage: 1,
-      maxPage: 10,
-      currData: [],
+      rawData: {},
+      page: 1,
+      perPage: 10,
+      currData: []
     };
 
     ['onPaginate'].forEach(f => { this[f] = this[f].bind(this) });
   }
 
-  getCurrPageData(arr, pageNumber) {
-    return arr.slice((pageNumber - 1) * 10, pageNumber * 10);
-  }
-
   componentDidMount() {
-    Axios.get('http://localhost:3456/studies').then(res => this.setState({rawData: res.data, currData: this.getCurrPageData(res.data, this.state.currPage)}));
+    Axios.get('http://localhost:3456/studies').then(data => this.setState({rawData: data}));
   }
 
-  onPaginate(options) {
-    this.setState({
-      currPage: options.page,
-      currData: this.getCurrPageData(this.state.rawData, options.page)
-    })
+  onPaginate({page, perPage}) {
+    this.setState({page, perPage});
   }
 
   render() {
-    const { currPage, rawData} = this.state;
-    const table = studiesTableLayout(rawData.slice((currPage - 1) * 10, currPage * 10));
+    const {page, perPage} = this.state;
+
     return (
       <div>
-        { table }
         <Paginate
           onPaginate={this.onPaginate}
           totalItems={100}
-          currentPage={this.state.currPage}
-          perPage={this.state.maxPage}
-          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
+          currentPage={page}
+          {...{perPage}}
+          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}}
+          perPageSizes={[10, 25, 50]} />
+        {studiesTableLayout(this.state.rawData.data, page, perPage)}
       </div>
     )
   }
