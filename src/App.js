@@ -2,17 +2,17 @@ import React, { Component } from 'react';
 import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
+//TODO: Figure out sandman styles
 
 const MEDIDATA_LOGO = "https://dsw6ye8s2ocl7.cloudfront.net/apps/checkmate/sandbox/assets/Medidata_Logo_white-c175f17f00a766df95d0f4663da812e90b4ef6d7041728e89e3f31bbccb97432.png";
-const studiesRow = (study) => {
+
+const studiesRow = (study, cols) => {
   return (<tr key={study.protocolId}>
-    <td>{study.protocolId}</td>
-    <td>{study.studyName}</td>
-    <td>{study.studyStatus}</td>
-    <td>{study.riskPlan}</td>
-    <td>{study.planStatus}</td>
-    <td>{study.lastUpdated}</td>
-    <td>{study.updatedBy}</td>
+    {
+      cols.map((c, i) => (
+        <td key={`td_${i}`}>{study[c]}</td>
+      ))
+    }
   </tr>);
 };
 
@@ -30,22 +30,24 @@ const header = (
   </header>
 );
 
-const studiesTableLayout = (studies = []) => {
+const studiesTableLayout = (studies = [], page = 0, perPage = 0) => {
   return (
     <table className="table table-hover studies-table study-list-table">
       <thead>
         <tr>
-          <th>Protocol ID</th>
-          <th>Study Name</th>
-          <th>Study Status</th>
-          <th>Risk Plan</th>
-          <th>Plan Status</th>
-          <th>Last Updated</th>
-          <th>Updated By</th>
+        {
+          studies[0] && Object.keys(studies[0]).map((k, i) => (
+            <th key={`th_${i}`}>{k}</th>
+          ))
+        }
         </tr>
       </thead>
       <tbody>
-      {studies.map(study => studiesRow(study))}
+      {
+        studies
+          .filter((s, place) => (place >= ((page - 1) * perPage) && place < (page * perPage)))
+          .map(study => studiesRow(study, Object.keys(studies[0])))
+      }
       </tbody>
     </table>
   )
@@ -56,43 +58,37 @@ class TableContainer extends Component {
     super(props);
 
     this.state = {
-      rawData: [],
-      currPage: 1,
-      maxPage: 10,
-      currData: [],
+      rawData: {},
+      page: 1,
+      perPage: 10,
+      currData: []
     };
 
     ['onPaginate'].forEach(f => { this[f] = this[f].bind(this) });
   }
 
-  getCurrPageData(arr, pageNumber) {
-    return arr.slice((pageNumber - 1) * 10, pageNumber * 10);
-  }
-
   componentDidMount() {
-    Axios.get('http://localhost:3456/studies').then(res => this.setState({rawData: res.data, currData: this.getCurrPageData(res.data, this.state.currPage)}));
+    Axios.get('http://localhost:3456/studies').then(data => this.setState({rawData: data}));
   }
 
-  onPaginate(options) {
-    this.setState({
-      currPage: options.page,
-      currData: this.getCurrPageData(this.state.rawData, options.page)
-    })
+  onPaginate({page, perPage}) {
+    this.setState({page, perPage});
   }
 
   render() {
-    const table = studiesTableLayout(this.state.currData);
+    const {page, perPage, rawData: {data = []} = {} } = this.state;
+
     return (
       <div>
         {header}
         <div id="main">
           <div className="mcc-col mcc-content">
-            { table }
+            { studiesTableLayout(data, page, perPage) }
             <Paginate
               onPaginate={this.onPaginate}
-              totalItems={100}
-              currentPage={this.state.currPage}
-              perPage={this.state.maxPage}
+              totalItems={data.length}
+              currentPage={page}
+              perPage={perPage}
               translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
           </div>
         </div>
