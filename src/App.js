@@ -4,8 +4,10 @@ import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
 //TODO: Figure out sandman styles
 
+const MEDIDATA_LOGO = "https://dsw6ye8s2ocl7.cloudfront.net/apps/checkmate/sandbox/assets/Medidata_Logo_white-c175f17f00a766df95d0f4663da812e90b4ef6d7041728e89e3f31bbccb97432.png";
+
 const studiesRow = (study, cols) => {
-  return (<tr>
+  return (<tr key={study.protocolId>
     {
       cols.map((c, i) => (
         <td key={`td_${i}`}>{study[c]}</td>
@@ -13,6 +15,20 @@ const studiesRow = (study, cols) => {
     }
   </tr>);
 };
+
+const header = (
+  <header className="navbar navbar-default">
+    <div className="container-fluid">
+      <div className="navbar-header">
+        <div className="logos">
+          <a className="navbar-brand" href="#home">
+            <div><img src={MEDIDATA_LOGO} alt="Medidata logo white" width="115" height="18" /></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+);
 
 const studiesTableLayout = (studies = [], page = 0, perPage = 0) => {
   return (
@@ -64,14 +80,18 @@ class TableContainer extends Component {
 
     return (
       <div>
-        <Paginate
-          onPaginate={this.onPaginate}
-          totalItems={100}
-          currentPage={page}
-          {...{perPage}}
-          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}}
-          perPageSizes={[10, 25, 50]} />
-        {studiesTableLayout(this.state.rawData.data, page, perPage)}
+        {header}
+        <div id="main">
+          <div className="mcc-col mcc-content">
+            { studiesTableLayout(this.state.rawData.data, page, perPage) }
+            <Paginate
+              onPaginate={this.onPaginate}
+              totalItems={100}
+              currentPage={this.state.currPage}
+              perPage={this.state.maxPage}
+              translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
+          </div>
+        </div>
       </div>
     )
   }
