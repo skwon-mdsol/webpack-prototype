@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
-//TODO: Figure out sandman styles
 
 const studiesRow = (study) => {
-  return (<tr>
-    <td>{study.protocol_id}</td>
-    <td>{study.name}</td>
-    <td>{study.status_oid}</td>
-    <td>{study.riskPlanDetails.riskPlan}</td>
-    <td>{study.riskPlanDetails.planStatus}</td>
+  return (<tr key={study.protocolId}>
+    <td>{study.protocolId}</td>
+    <td>{study.studyName}</td>
+    <td>{study.studyStatus}</td>
+    <td>{study.riskPlan}</td>
+    <td>{study.planStatus}</td>
     <td>{study.lastUpdated}</td>
-    <td>{study.riskPlanDetails}</td>
+    <td>{study.updatedBy}</td>
   </tr>);
 };
 
@@ -42,35 +41,42 @@ class TableContainer extends Component {
     super(props);
 
     this.state = {
-      rawData: {},
+      rawData: [],
       currPage: 1,
       maxPage: 10,
-      currData: []
+      currData: [],
     };
 
     ['onPaginate'].forEach(f => { this[f] = this[f].bind(this) });
   }
 
+  getCurrPageData(arr, pageNumber) {
+    return arr.slice((pageNumber - 1) * 10, pageNumber * 10);
+  }
+
   componentDidMount() {
-    Axios.get('http://localhost:3456/studies').then(data => this.setState({rawData: data}));
+    Axios.get('http://localhost:3456/studies').then(res => this.setState({rawData: res.data, currData: this.getCurrPageData(res.data, this.state.currPage)}));
   }
 
   onPaginate(options) {
-    console.log(options);
+    this.setState({
+      currPage: options.page,
+      currData: this.getCurrPageData(this.state.rawData, options.page)
+    })
   }
 
   render() {
-    console.log(this.state.rawData);
-
+    const { currPage, rawData} = this.state;
+    const table = studiesTableLayout(rawData.slice((currPage - 1) * 10, currPage * 10));
     return (
       <div>
+        { table }
         <Paginate
           onPaginate={this.onPaginate}
           totalItems={100}
-          currentPage={1}
-          perPage={10}
-          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}}
-          perPageSizes={[10, 25, 50]} />
+          currentPage={this.state.currPage}
+          perPage={this.state.maxPage}
+          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
       </div>
     )
   }
