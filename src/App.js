@@ -3,6 +3,7 @@ import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
 
+const MEDIDATA_LOGO = "https://dsw6ye8s2ocl7.cloudfront.net/apps/checkmate/sandbox/assets/Medidata_Logo_white-c175f17f00a766df95d0f4663da812e90b4ef6d7041728e89e3f31bbccb97432.png";
 const studiesRow = (study) => {
   return (<tr key={study.protocolId}>
     <td>{study.protocolId}</td>
@@ -14,6 +15,20 @@ const studiesRow = (study) => {
     <td>{study.updatedBy}</td>
   </tr>);
 };
+
+const header = (
+  <header className="navbar navbar-default">
+    <div className="container-fluid">
+      <div className="navbar-header">
+        <div className="logos">
+          <a className="navbar-brand" href="#home">
+            <div><img src={MEDIDATA_LOGO} alt="Medidata logo white" width="115" height="18" /></div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+);
 
 const studiesTableLayout = (studies = []) => {
   return (
@@ -66,17 +81,21 @@ class TableContainer extends Component {
   }
 
   render() {
-    const { currPage, rawData} = this.state;
-    const table = studiesTableLayout(rawData.slice((currPage - 1) * 10, currPage * 10));
+    const table = studiesTableLayout(this.state.currData);
     return (
       <div>
-        { table }
-        <Paginate
-          onPaginate={this.onPaginate}
-          totalItems={100}
-          currentPage={this.state.currPage}
-          perPage={this.state.maxPage}
-          translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
+        {header}
+        <div id="main">
+          <div className="mcc-col mcc-content">
+            { table }
+            <Paginate
+              onPaginate={this.onPaginate}
+              totalItems={100}
+              currentPage={this.state.currPage}
+              perPage={this.state.maxPage}
+              translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
+          </div>
+        </div>
       </div>
     )
   }
