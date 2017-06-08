@@ -12,6 +12,9 @@
     "react-bootstrap": "^0.31.0",
     "react-dom": "^15.5.4",
     "react-highcharts": "^12.0.0",
+    "react-router": "^4.1.1",
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
     "sandman-bower": "git+ssh://git@github.com/mdsol/sandman-bower.git#1.2.3"
   },
   "devDependencies": {
