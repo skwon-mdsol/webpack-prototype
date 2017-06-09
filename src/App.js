@@ -1,3 +1,4 @@
+/*
 import React, { Component } from 'react';
 import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
@@ -108,3 +109,4 @@ class App extends Component {
 }
 
 export default App;
+*/
