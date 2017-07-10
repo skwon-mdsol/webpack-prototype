@@ -5,9 +5,101 @@ body {
 }
 
 .navbar-default {
+  margin-bottom: 0;
   padding: 0;
-  padding-bottom: 5px;
   border-radius: 0;  border: none;
   background-color: #335177;
   color: #fff;
+}
+
+.card-container {
+  /* flex properties */
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+
+  /* Subject to change */
+}
+
+.card-container .card {
+  /* flex properties */
+  flex-basis: calc(24% - 10px);
+  flex-flow: column wrap;
+  /* Misc */
+  /* FIXME You have a flex containing a flex sitch, perhaps hacky */
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  margin: 0 15px 5px 0;
+
+  /* Subject to change */
+  background: #fff;
+}
+
+.card .card-status-bar {
+  background: teal;
+  height: 7px;
+}
+
+.card .card-block {
+  display: flex;
+  flex-flow: column wrap;
+  flex-grow: 1;
+  padding: 10px;
+}
+
+.info {
+  display: block;
+}
+
+/* XXX Custom Stuff */
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+}
+
+.card-header .header-text {
+  flex-grow: 1;
+  display: inline-flex;
+}
+
+.card-header b {
+  align-self: flex-end;
+}
+
+.card-header .icon {
+  margin-right: 5px;
+}
+
+.card-footer {
+  display: flex;
+  flex-grow: 1;
+}
+
+.card-footer .footer-spacer {
+  flex-grow: 1;
+}
+
+.card-footer .btn + .btn {
+  margin-left: 3px;
+}
+
+.card-footer .footer-controls {
+  align-self: flex-end;
+}
+
+/* XXX End Custom */
+
+@media only screen and (min-width: 768px) and (max-width: 992px) {
+  .card-container .card {
+    flex-basis: calc(49% - 10px);
+  }
+}
+
+/* FIXME: The max-width is subject to change. This currently accounts for */
+@media only screen and (min-width: 992px) and (max-width: 1440px) {
+  .card-container .card {
+    flex-basis: calc(32% - 10px);
+  }
 }

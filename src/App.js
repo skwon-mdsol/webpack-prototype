@@ -3,18 +3,7 @@ import * as Axios from 'axios';
 import Paginate from 'lego/lib/Paginate';
 import 'sandman-bower/assets/platform.css'
 
-
 const MEDIDATA_LOGO = "https://dsw6ye8s2ocl7.cloudfront.net/apps/checkmate/sandbox/assets/Medidata_Logo_white-c175f17f00a766df95d0f4663da812e90b4ef6d7041728e89e3f31bbccb97432.png";
-
-const studiesRow = (study, cols) => {
-  return (<tr key={study.protocolId}>
-    {
-      cols.map((c, i) => (
-        <td key={`td_${i}`}>{study[c]}</td>
-      ))
-    }
-  </tr>);
-};
 
 const header = (
   <header className="navbar navbar-default">
@@ -30,78 +19,85 @@ const header = (
   </header>
 );
 
-const studiesTableLayout = (studies = [], page = 0, perPage = 0) => {
-  return (
-    <table className="table table-hover studies-table study-list-table">
-      <thead>
-        <tr>
-        {
-          studies[0] && Object.keys(studies[0]).map((k, i) => (
-            <th key={`th_${i}`}>{k}</th>
-          ))
-        }
-        </tr>
-      </thead>
-      <tbody>
-      {
-        studies
-          .filter((s, place) => (place >= ((page - 1) * perPage) && place < (page * perPage)))
-          .map(study => studiesRow(study, Object.keys(studies[0])))
-      }
-      </tbody>
-    </table>
-  )
-};
+class CardContainer extends React.PureComponent {
+  render() {
+    return <div className='card-container'>
+      {this.props.children}
+    </div>
+  }
+}
 
-class TableContainer extends Component {
+class Card extends React.Component {
   constructor(props) {
     super(props);
-
-    this.state = {
-      rawData: {},
-      page: 1,
-      perPage: 10,
-      currData: []
-    };
-
-    ['onPaginate'].forEach(f => { this[f] = this[f].bind(this) });
-  }
-
-  componentDidMount() {
-    Axios.get('http://localhost:3456/studies').then(data => this.setState({rawData: data}));
-  }
-
-  onPaginate({page, perPage}) {
-    this.setState({page, perPage});
   }
 
   render() {
-    const {page, perPage, rawData: {data = []} = {} } = this.state;
+    const { role, access } = this.props;
+    return <div className='card'>
+      <div className='card-status-bar'></div>
+      <div className='card-block'>
 
-    return (
-      <div>
-        {header}
-        <div id="main">
-          <div className="mcc-col mcc-content">
-            { studiesTableLayout(data, page, perPage) }
-            <Paginate
-              onPaginate={this.onPaginate}
-              totalItems={data.length}
-              currentPage={page}
-              perPage={perPage}
-              translations={{of: " of ", totalResults: "Total Result(s)", perPage: "Per Page"}} />
+        {/* header */}
+        <div className='card-header'>
+          <div className='icon'>
+            <i className='fa fa-clipboard' />
+          </div>
+          <div className='header-text'>
+            <div>
+              <b>{role}</b>
+              <span className='info'>Site Internal Personnel</span>
+            </div>
+          </div>
+          <b>Status</b>
+        </div>
+        <hr />
+
+        {/* body */}
+        <div className='card-body'>
+          <h5>Access To</h5>
+          {access.map(a => <h6>{a}</h6>)}
+        </div>
+
+        {/* footer */}
+        <div className='card-footer'>
+          <div className='footer-spacer'></div>
+          <div className='footer-controls'>
+            <button className='btn btn-xs btn-default'>Edit</button>
+            <button className='btn btn-xs btn-default'>Remove</button>
           </div>
         </div>
       </div>
-    )
+    </div>
   }
 }
+
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        <TableContainer />
+        {header}
+        <div id='main'>
+          <div className='mcc-row'>
+            <div className='mcc-col mcc-sidebar mcc-sidebar-left'>
+              <div className='sidebar-scroll'>
+                <ul className='sidebar-nav'>
+                  <li>Example Sidebar</li>
+                </ul>
+              </div>
+            </div>
+            <div className='mcc-content container-fluid mcc-col'>
+              <CardContainer>
+                <Card role='Admin' access={['cloud administration', 'ract ui', 'design optimizer', 'wu tang clan']}/>
+                <Card role='Customer Admin' access={['cloud administration']}/>
+                <Card role='Design Optimizer Admin' access={['cloud administration']}/>
+                <Card role='Design Optimizer Power User' access={['design optimizer']}/>
+                <Card role='Design Optimizer Read Only' access={['juno']}/>
+              </CardContainer>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
